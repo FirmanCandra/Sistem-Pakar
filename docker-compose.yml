@@ -1,0 +1,77 @@
+version: "3.9"
+
+services:
+
+  app:
+    build: .
+    container_name: sistempakar-app
+
+    restart: unless-stopped
+
+    ports:
+      - "8000:80"
+
+    volumes:
+      - .:/var/www/html
+
+    depends_on:
+      - mysql
+
+    networks:
+      - sistempakar
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  mysql:
+
+    image: mysql:8.0
+
+    container_name: sistempakar-db
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sistempakar
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    networks:
+      - sistempakar
+
+  phpmyadmin:
+
+    image: phpmyadmin/phpmyadmin
+
+    container_name: sistempakar-pma
+
+    restart: unless-stopped
+
+    depends_on:
+      - mysql
+
+    environment:
+      PMA_HOST: mysql
+
+    ports:
+      - "8081:80"
+
+    networks:
+      - sistempakar
+
+networks:
+  sistempakar:
+
+volumes:
+  mysql_data:
